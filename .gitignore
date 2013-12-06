@@ -1,2 +1,6 @@
+public/css/
+public/img/
+public/fonts/
+!main.css
 node_modules/
 *.js
