@@ -1,6 +1,7 @@
-public/css/
-public/img/
-public/fonts/
-!main.css
 node_modules/
-*.js
+public/css
+public/img
+public/js
+public/fonts
+!public/css/main.css
+!public/js/main.coffee
