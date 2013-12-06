@@ -1,0 +1,14 @@
+<form ng-show='o.show' ng-animate='{show:"fade-show"}'>
+	<button ng-show='o.close' class='btn btn-xs btn-default pull-right' ng-click='o.show=0'>Close</button>
+	<h4 ng-bind='o.title'></h4>
+	<fieldset>
+		<div class='form-group' ng-repeat='i in o.inputs'>
+			<label>
+				<small ng-bind='i.label'></small>
+			</label>
+			<input type='{{i.type}}' class='form-control' ng-model='o.data[o.dataType][i.model]'>
+		</div>
+	</fieldset>
+	<p><button class='btn btn-primary btn-block' ng-disabled='o.disabled' ng-bind='o.button' ng-click='o.fn(o)'></button></p>
+	<p ng-show='o.showStatus' ng-animate='{show:"fade-show"}' class='{{o.statusClass}}' ng-bind='o.status'></p>
+</form>

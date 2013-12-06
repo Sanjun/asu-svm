@@ -1,0 +1,15 @@
+<div class='navbar navbar-inverse {{o.style}}'>
+	<div class='navbar-header'>
+		<a href='#' class='navbar-brand' ng-bind-html-unsafe='o.brand'></a>
+		<button type='button' class='navbar-toggle' data-toggle='collapse' data-target='.navbar-collapse'>
+			<span class='icon-bar'></span>
+			<span class='icon-bar'></span>
+			<span class='icon-bar'></span>
+		</button>
+	</div>
+	<div class='collapse navbar-collapse'>
+		<ul class='nav navbar-nav navbar-right'>
+			<li ng-repeat='m in o.menus' ng-click='m.fn()'><a href='' ng-bind-html-unsafe='m.label'></a></li>
+		</ul>
+	</div>
+</div>

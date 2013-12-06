@@ -1,2 +1,54 @@
-GUEST
-<button class='btn btn-info'>test</button>
+<div class='container' id="wrapper">
+	<div class='row maroon'>
+		<span class='col col-lg-12 col-md-12 col-sm-12 col-xs-12'>
+			<img class='img-responsive' ng-src='{{"img/header.png"}}'>
+		</span>
+	</div>
+	<div class='row'>
+		<span class='col col-lg-12 col-md-12 col-sm-12 col-xs-12'>
+			<navbar o='navbarGuest'></navbar>
+		</span>
+	</div>	
+	<div class='row' ng-show='navbarGuest.switch=="home"' ng-animate="{show:'fade-show'}">
+		<span class='col col-lg-12 col-md-12 col-sm-12 col-xs-12'>
+			<h2>Home</h2>
+		</span>
+	</div>	
+	<div class='row' ng-show='navbarGuest.switch=="news"' ng-animate="{show:'fade-show'}">
+		<span class='col col-lg-12 col-md-12 col-sm-12 col-xs-12'>
+			<h2>News</h2>
+		</span>
+	</div>
+	<div class='row' ng-show='navbarGuest.switch=="account"' ng-animate="{show:'fade-show'}">
+		<span class='col col-lg-9 col-md-9 col-sm-8 hidden-xs'>
+			carousel
+		</span>
+		<span class='col col-lg-3 col-md-3 col-sm-4 col-xs-12'>
+			<form2 o='frmLogin'></form2>
+			<br>
+			<form2 o='frmActivate'></form2>
+		</span>
+	</div>
+	
+	<p id="pusher" style="line-height:0;"></p>
+</div>
+<footer id="footer" class='container'>
+	<div class='row maroon'>
+		<span class='col col-lg-12 col-md-12 col-sm-12 col-xs-12'>
+			<br>
+			<p class='text-center'>
+				<small>
+				<a href='#' title="Website's Structure">Site Map</a> |					
+				<a href='#' title="Website's Developer">Developer</a> | 				
+				<a href='#' title='Frequently Ask Question'>FAQ</a> |					
+				<a href='#' title="Contact School Administration">Contact Us</a> 					
+				</small>
+			</p>
+			<p class='text-center'>
+				<small class='text-muted'>
+					Copyright 2013 &copy;
+				</small>
+			</p>
+		</span>
+	</div>
+</footer>
