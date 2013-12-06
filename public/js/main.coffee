@@ -10,10 +10,25 @@ angular.module('svm',[])
 				
 		$locationProvider.html5Mode 1
 	])
+	.factory('socket', ['$rootScope',($rootScope)->
+		socket = io.connect()
+		
+		emit: (event, data, callback)->
+			socket.emit event, data, ->
+				args = arguments
+				$rootScope.$apply ->
+					callback.apply socket, args
+					
+		on: (event, callback)->
+			socket.on event, ->
+				args = arguments
+				$rootScope.$apply ->
+					callback.apply socket, args
+	])
 	.controller('loadingCtrl', ['$location',($location)->
 		$location.path '/guest'
 	])
-	.controller('mainCtrl', ['$location','$scope',($location,$scope)->
+	.controller('mainCtrl', ['$location','$scope','socket',($location,$scope,socket)->
 		
 	])
 	
