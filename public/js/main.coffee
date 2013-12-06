@@ -29,7 +29,7 @@ angular.module('svm',[])
 		$location.path '/guest'
 	])
 	.controller('mainCtrl', ['$location','$scope','socket',($location,$scope,socket)->
-		
+	
 	])
 	
 angular.bootstrap document, ['svm']
