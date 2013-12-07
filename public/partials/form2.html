@@ -8,7 +8,13 @@
 			</label>
 			<input type='{{i.type}}' class='form-control' ng-model='o.data[o.dataType][i.model]'>
 		</div>
+		<div class='form-group' ng-repeat='t in o.tinymces'>
+			<label>
+				<small ng-bind='t.label'></small>
+			</label>
+			<textarea ui-tinymce ng-model='o.data[o.dataType][t.model]'></textarea>
+		</div>
 	</fieldset>
 	<p><button class='btn btn-primary btn-block' ng-disabled='o.disabled' ng-bind='o.button' ng-click='o.fn(o)'></button></p>
-	<p ng-show='o.showStatus' ng-animate='{show:"fade-show"}' class='{{o.statusClass}}' ng-bind='o.status'></p>
+	<p  ng-show='o.showStatus' ng-animate='{show:"fade-show"}' class='{{o.statusClass}}' ng-bind='o.status'></p>
 </form>

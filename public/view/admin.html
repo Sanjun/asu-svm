@@ -1,20 +1,30 @@
 <div class='container' id="wrapper">
+	<!--header-->
 	<div class='row maroon'>
 		<span class='col col-lg-12 col-md-12 col-sm-12 col-xs-12'>
 			<img class='img-responsive' ng-src='{{"img/header.png"}}'>
 		</span>
 	</div>
+	<!--navbar-->
 	<div class='row'>
 		<span class='col col-lg-12 col-md-12 col-sm-12 col-xs-12'>
 			<navbar o='navbar'></navbar>
 		</span>
 	</div>	
+	<!--home page-->
 	<div class='row' ng-show='navbar.switch=="home"' ng-animate="{show:'fade-show'}">
-		<span class='col col-lg-12 col-md-12 col-sm-12 col-xs-12'>
+		
+
+		<span class='col col-md-12'>
 			<ul class='nav nav-tabs'>
 				<li ng-repeat='p in homePages' class='{{($index==0)?"active":""}}'>
 					<a data-toggle='tab' href='#page-{{$index}}'>
 						<small ng-bind='p.tab'></small>
+					</a>
+				</li>
+				<li class="{{(homePages.length==0)?'active':''}}">
+					<a data-toggle='tab' href='#new-page'>
+						<small>New Page</small>
 					</a>
 				</li>
 			</ul>
@@ -22,25 +32,29 @@
 				<div class='tab-pane fade well well-lg {{($index==0)?"active in":""}}' id='page-{{$index}}' ng-repeat='p in homePages'>
 					<article ng-bind-html-unsafe='p.content'></article>
 				</div>
+				<div class='tab-pane fade well well-lg {{(homePages.length==0)?"active in":""}}' id='new-page'>
+					<form2 o='frmNewPage'></form2>
+					<a class='btn btn-block btn-info' 
+						data-toggle='modal'
+						href='#previewModal'
+						ng-click='previewModal=frmNewPage.data.doc.content'>
+						Preview</a>
+				</div>
 			</section>
 		</span>
 	</div>	
+	<!--news page-->
 	<div class='row' ng-show='navbar.switch=="news"' ng-animate="{show:'fade-show'}">
 		<span class='col col-lg-12 col-md-12 col-sm-12 col-xs-12'>
 			<h2>News</h2>
 		</span>
 	</div>
-	<div class='row' ng-show='navbar.switch=="account"' ng-animate="{show:'fade-show'}">
-		<span class='col col-lg-9 col-md-9 col-sm-8 hidden-xs'>
-			carousel
-		</span>
-		<span class='col col-lg-3 col-md-3 col-sm-4 col-xs-12'>
-			<form2 o='frmLogin'></form2>
-			<br>
-			<form2 o='frmActivate'></form2>
-		</span>
-	</div>
 	
+	<!--preview modal-->
+	<div class='modal fade well well-lg' id='previewModal'>
+		<button type='button' style='position:fixed; right: 2em;' data-dismiss='modal' class='btn btn-default btn-xs'>Close</button>
+		<section ng-bind-html-unsafe='previewModal'></section>
+	</div>
 	<p id="pusher" style="line-height:0;"></p>
 </div>
 <footer id="footer" class='container'>
