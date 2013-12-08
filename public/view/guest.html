@@ -1,49 +1,126 @@
-<div class='container' id="wrapper">
+<p ng-show='frmSearchNews.rData==undefined'>Loading, please wait..</p>
+<div class='container' id="wrapper" ng-animate="{show:'fade-show'}" ng-show="frmSearchNews.rData.length>-1">
+	<!--header-->
 	<div class='row maroon'>
 		<span class='col col-lg-12 col-md-12 col-sm-12 col-xs-12'>
 			<img class='img-responsive' ng-src='{{"img/header.png"}}'>
 		</span>
 	</div>
+	<!--navbar-->
 	<div class='row'>
 		<span class='col col-lg-12 col-md-12 col-sm-12 col-xs-12'>
 			<navbar o='navbar'></navbar>
+			<br>
 		</span>
 	</div>	
+	<!--home-->
 	<div class='row' ng-show='navbar.switch=="home"' ng-animate="{show:'fade-show'}">
-		<span class='col col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-			<ul class='nav nav-tabs'>
+		<span class='col col-md-3 col-lg-3 col-sm-3'></span>
+		<span class='col col-md-6 col-lg-6 col-sm-6'>
+			<section class='tab-content'>
+				<div class='tab-pane fade well well-sm {{($index==0)?"active in":""}}' id='page-{{$index}}' ng-repeat='p in homePages'>
+					<article ng-bind-html-unsafe='p.content'></article>
+				</div>
+			</section>
+		</span>
+		<span class='col col-md-3 col-lg-3 col-sm-3'>
+			<ul class='nav nav-stacked'>
 				<li ng-repeat='p in homePages' class='{{($index==0)?"active":""}}'>
 					<a data-toggle='tab' href='#page-{{$index}}'>
 						<small ng-bind='p.tab'></small>
 					</a>
 				</li>
 			</ul>
+		</span>
+	</div>	
+	<!--news-->
+	<div class='row' ng-show='navbar.switch=="news"' ng-animate="{show:'fade-show'}">
+		<span class='col col-lg-3 col-md-3 col-sm-3'></span>
+		<span class='col col-lg-6 col-md-6 col-sm-6'>
 			<section class='tab-content'>
-				<div class='tab-pane fade well well-lg {{($index==0)?"active in":""}}' id='page-{{$index}}' ng-repeat='p in homePages'>
-					<article ng-bind-html-unsafe='p.content'></article>
+				<div class='tab-pane fade well well-sm {{($index==0)?"active in":""}}' id='page2-{{$index}}' ng-repeat='m in frmSearchNews.rData'>
+					<article>
+						<section class='media-header'>
+							<address>
+								<small class='text-muted'>
+									Date: <span ng-bind='m.date|date:"MMM dd, yyyy (hh:mm:ss a)"'></span>
+								</small><br>
+								<small class='text-muted' >
+									Author: <span ng-bind='m.author.toUpperCase()'></span>
+								</small><br>
+							</address>
+							<h5 class='text-center'><strong ng-bind='m.title'></strong></h5>
+						</section>
+						<section class='media-body'>
+							<p><img class='img-responsive img-thumbnail'ng-src='{{m.image}}'></p>
+							<span ng-bind-html-unsafe='(m.content.length>1500)?m.content.substr(0,1500) :m.content'></span>
+							<span ng-show='m.content.length>1500'><p><strong>. . . . .</strong></p> 
+								<p>
+									<a class='btn btn-xs btn-success' 
+										data-toggle='modal'
+										href='#previewModal2'
+										ng-click='modal.data=m'>
+										Read More</a>						
+								</p>
+							</span>
+						</section>
+					</article>
 				</div>
 			</section>
 		</span>
-	</div>	
-	<div class='row' ng-show='navbar.switch=="news"' ng-animate="{show:'fade-show'}">
-		<span class='col col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-			<h2>News</h2>
+		<span class='col col-lg-3 col-md-3 col-sm-3'>
+			<form2 o='frmSearchNews'></form2>
+			<hr>
+			<ul class='nav nav-stacked'>
+				<li ng-repeat='n in frmSearchNews.rData' class='{{($index==0)?"active":""}}'>
+					<a data-toggle='tab' href='#page2-{{$index}}'>
+						<small ng-bind='n.title'></small>
+					</a>
+				</li>
+			</ul>
+			<br>
+			<showmore form='frmSearchNews' fn='showMore'></showmore>
 		</span>
 	</div>
+	<!--account-->
 	<div class='row' ng-show='navbar.switch=="account"' ng-animate="{show:'fade-show'}">
-		<span class='col col-lg-9 col-md-9 col-sm-8 hidden-xs'>
-			carousel
+		<span class='col col-lg-3 col-md-3 col-sm-4'>
+			
 		</span>
-		<span class='col col-lg-3 col-md-3 col-sm-4 col-xs-12'>
+		<span class='col col-lg-6 col-md-6 col-sm-6'>
+		</span>
+		<span class='col col-lg-3 col-md-3 col-sm-3'>
 			<form2 o='frmLogin'></form2>
 			<br>
+			<hr>
 			<form2 o='frmActivate'></form2>
+			<form2 o='frmSaveAccount'></form2>
 		</span>
 	</div>
-	
+	<div class='modal fade well well-lg' id='previewModal2'>
+		<button type='button' style='position:fixed; right: 2em;' data-dismiss='modal' class='btn btn-default btn-xs'>Close</button>
+		<br><br>
+		<article>
+			<section class='media-header'>
+				<address>
+					<small class='text-muted'>
+						Date: <span ng-bind='modal.data.date|date:"MMM dd, yyyy (hh:mm:ss a)"'></span>
+					</small><br>
+					<small class='text-muted' >
+						Author: <span ng-bind='modal.data.author.toUpperCase()'></span>
+					</small><br>
+				</address>
+				<h5 class='text-center'><strong ng-bind='modal.data.title'></strong></h5>
+			</section>
+			<section class='media-body'>
+				<p class='text-center'L><img class='img-responsive img-thumbnail' ng-src='{{modal.data.image}}'></p>
+				<span ng-bind-html-unsafe='modal.data.content'></span>
+			</section>
+		</article>
+	</div>
 	<p id="pusher" style="line-height:0;"></p>
 </div>
-<footer id="footer" class='container'>
+<footer id="footer" class='container' ng-animate="{show:'fade-show'}" ng-show="frmSearchNews.rData.length>-1">
 	<div class='row maroon'>
 		<span class='col col-lg-12 col-md-12 col-sm-12 col-xs-12'>
 			<br>
