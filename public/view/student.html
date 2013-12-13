@@ -1,9 +1,9 @@
 <p ng-show='frmSearchNews.rData==undefined'>Loading, please wait..</p>
 <div class='container' id="wrapper" ng-animate="{show:'fade-show'}" ng-show="frmSearchNews.rData.length>-1">
 	<!--header-->
-	<div class='row' style='margin-bottom:-2em'>
+	<div class='row'>
 		<span class='col col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-			<img style='background:white' class='img-responsive' ng-src='{{"img/header.png"}}'>
+			<img class='img-responsive' ng-src='{{"img/header.png"}}'>
 		</span>
 	</div>
 	<!--navbar-->
@@ -12,8 +12,87 @@
 			<navbar o='navbar'></navbar>
 		</span>
 	</div>	
+	<!--post-->
+	<div class='row' ng-show='navbar.switch=="post"' ng-animate="{show:'fade-show'}">
+		<span class='col col-lg-3 col-md-3 col-sm-3'></span>
+		<span class='col col-lg-6 col-md-6 col-sm-6'>
+			<button ng-hide='frmCreatePost.show' class='btn btn-default btn-xs pull-right' ng-click='frmCreatePost.show=1'>Create Post</button>
+			<p style='clear:both;line-height:0'></p>
+			<div class='well well-sm' ng-show='frmCreatePost.show'>
+				<form2 o='frmCreatePost'></form2>
+				<a class='btn btn-block btn-info' 
+					data-toggle='modal'
+					href='#previewModal'
+					ng-click='previewModal=frmCreatePost.data.doc.content'>
+					Preview</a>
+			</div>	
+			<section class='tab-content'>
+				<div class='tab-pane fade well well-sm {{($index==0)?"active in":" "}}' id='page3-{{$index}}' ng-repeat='m in frmSearchPosts.rData'>
+					<article>
+						<section class='media-header'>
+							<address>
+								<small class='text-muted'>
+									Date: <span ng-bind='m.date|date:"MMM dd, yyyy (hh:mm:ss a)"'></span>
+								</small><br>
+								<small class='text-muted' >
+									Poster: <span ng-bind='m.user.toUpperCase()'></span>
+								</small><br>
+							</address>
+							<h5 class='text-center'><strong ng-bind='m.title'></strong></h5>
+						</section>
+						<section class='media-body'>
+							<p ng-show='m.image!=null'><img class='img-responsive img-thumbnail'ng-src='{{m.image}}'></p>
+							<span ng-bind-html-unsafe='(m.content.length>1500)?m.content.substr(0,1500) :m.content'></span>
+							<span ng-show='m.content.length>1500'><p><strong>. . . . .</strong></p> 
+								<p>
+									<a class='btn btn-xs btn-success' 
+										data-toggle='modal'
+										href='#previewModal2'
+										ng-click='modal.data=m'>
+										Read More</a>						
+								</p>
+							</span>
+						</section>
+					</article>
+					<p class='pull-right'>
+						<button class='btn btn-default btn-xs' ng-click='like(m)' ng-disabled='m.disableLike'>
+							<span ng-bind='m.likeCount' ng-show='m.likeCount > 0'></span>&nbsp;
+							<span class='glyphicon glyphicon-thumbs-up'></span>&nbsp;
+							<span ng-show='m.liked==1'>(Liked)</span>
+						</button>
+						<button class='btn btn-default btn-xs' ng-click='m.showComments=(m.showComments==1)?0:1'>
+							<span class='glyphicon glyphicon-comment'></span>&nbsp;
+							<span ng-bind='m.commentCount' ng-show='m.commentCount > 0'></span>
+						</button>
+					</p>
+					<p style='clear:both;line-height:0'></p>
+					<div ng-show='m.showComments' ng-animate="{show:'fade-show'}">
+						<p ng-show='m.comments.length<m.commentCount'><button class='btn btn-xs btn-block btn-default' ng-click='previous(m, "comments")' ng-disabled='m.disablePrevious'>Previous Comments</button></p>
+						<address ng-repeat='c in m.comments' class='text-blocked' style='border: .1em rgba(80,20,20,.5) solid;'>
+							<small class='text-muted' ng-bind='c.date|date: "MMMM dd, yyyy (hh:mm:ss a)"'></small><br>
+							<span ng-bind='c.user.toUpperCase()'></span>: <span ng-bind='c.comment'></span>
+						</address>
+					<form2 o='m.frmComment'></form2>
+					</div>
+				</div>
+			</section>
+		</span>
+		<span class='col col-lg-3 col-md-3 col-sm-3' style='height: 30em;overflow-y:auto;'>
+			<form2 o='frmSearchPosts'></form2>
+			<hr>
+			<ul class='nav nav-stacked'  >
+				<li ng-repeat='n in frmSearchPosts.rData'>
+					<a data-toggle='tab' href='#page3-{{$index}}'>
+						<small ng-bind='n.title'></small>
+					</a>
+				</li>
+			</ul>
+			<br>
+			<showmore form='frmSearchPosts' fn='showMore'></showmore>
+		</span>
+	</div>
 	<!--home-->
-	<div class='row' ng-show='navbar.switch=="home"' ng-animate="{show:'fade-show'}">
+	<div class='row' ng-show='navbar.switch=="home"' ng-animate="{show:'fade-show'}" id='homePage'>
 		<span class='col col-md-3 col-lg-3 col-sm-3'></span>
 		<span class='col col-md-6 col-lg-6 col-sm-6'>
 			<section class='tab-content'>
@@ -36,7 +115,7 @@
 	<div class='row' ng-show='navbar.switch=="news"' ng-animate="{show:'fade-show'}">
 		<span class='col col-lg-3 col-md-3 col-sm-3'></span>
 		<span class='col col-lg-6 col-md-6 col-sm-6'>
-		<section class='tab-content' >
+			<section class='tab-content'>
 				<div class='tab-pane fade well well-sm {{($index==0)?"active in":""}}' id='page2-{{$index}}' ng-repeat='m in frmSearchNews.rData'>
 					<article>
 						<section class='media-header'>
@@ -81,21 +160,7 @@
 			<showmore form='frmSearchNews' fn='showMore'></showmore>
 		</span>
 	</div>
-	<!--account-->
-	<div class='row' ng-show='navbar.switch=="account"' ng-animate="{show:'fade-show'}">
-		<span class='col col-lg-3 col-md-3 col-sm-4'>
-			
-		</span>
-		<span class='col col-lg-6 col-md-6 col-sm-6'>
-		</span>
-		<span class='col col-lg-3 col-md-3 col-sm-3'>
-			<form2 o='frmLogin'></form2>
-			<br>
-			<hr>
-			<form2 o='frmActivate'></form2>
-			<form2 o='frmSaveAccount'></form2>
-		</span>
-	</div>
+	
 	<div class='modal fade well well-lg' id='previewModal2'>
 		<button type='button' style='position:fixed; right: 2em;' data-dismiss='modal' class='btn btn-default btn-xs'>Close</button>
 		<br><br>
@@ -134,14 +199,8 @@
 			<p class='text-center'>
 				<small class='text-muted'>
 					Copyright 2013 &copy;
-					</br> AKLAN STATE UNIVERSITY </br> 
-					SCHOOL OF VETERINARY MEDICINE </br>
-					Banga, Aklan 5601 Philippines </br> </br>
-					Website Developed By: Sonny Jhun M. Sian, Megue L. Revestir, Roben M. Nepomuceno, Belenda B. Salas, & Wiline D. Relator</br>
-					Bachelor of Science in Information Technology 4B, ASU-CIT
 				</small>
 			</p>
-			
 		</span>
 	</div>
 </footer>

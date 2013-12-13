@@ -24,23 +24,42 @@ schema =
 		date: 
 			type: String
 			default: Date.now
-	defaultMenus: new mongoose.Schema
-		type: String
-		value: String
-		
+	posts: new mongoose.Schema
+		title: String
+		content: String
+		user: String
+		date:
+			type: String
+			default: Date.now
+	likes: new mongoose.Schema
+		postId: String
+		liker: String
+	comments: new mongoose.Schema
+		postId: String
+		user: String
+		comment: String
+		date:
+			type: String
+			default: Date.now
+			
 schema.users.index {user: 1}, {unique: 1}
 schema.users.index {name: 1}
 schema.users.index {id: 1}, {unique: 1}
 schema.news.index {title: 1}
 schema.news.index {author: 1}
-schema.defaultMenus.index {type:1}, {unique: 1}
+schema.posts.index {user: 1}
+schema.posts.index {title: 1}
+schema.likes.index {postId: 1,liker: 1}, {unique: 1}
+schema.likes.index {postId: 1}
+schema.comments.index {postId: 1}
 
 Model = 
 		users: mongoose.model "users", schema.users
 		homePages: mongoose.model "homePages", schema.homePages
 		news: mongoose.model "news", schema.news
-		defaultMenus: mongoose.model "defaultMenus", schema.defaultMenus
-		
+		posts: mongoose.model "posts", schema.posts
+		likes: mongoose.model 'likes', schema.likes
+		comments: mongoose.model 'comments', schema.comments
 app.configure ->
 	app.use express.static 'public'
 
@@ -100,3 +119,18 @@ app.io.route 'update', (req)->
 	newDoc = {$set: data.doc}
 	
 	Model[model].update query, newDoc, {upsert:1}, (e,m)-> setTimeout (-> req.io.respond m), 500
+	
+app.io.route 'alert_all', (req)->
+	dta = req.data
+	data = dta.data
+	type = dta.type
+	
+	console.log data
+	req.io.broadcast type, data
+	
+app.io.route 'count', (req)->
+	data = req.data
+	model = data.model
+	query = data.query
+	
+	Model[model].count query, (e,m)-> req.io.respond m

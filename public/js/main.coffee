@@ -7,6 +7,9 @@ angular.module('svm',['ui.tinymce','ui.keypress'])
 			.when '/guest',
 				templateUrl: 'view/guest.html'
 				controller: 'mainCtrl'
+			.when '/student',
+				templateUrl: 'view/student.html'
+				controller: 'mainCtrl'
 			.when '/admin',
 				templateUrl: 'view/admin.html'
 				controller: 'mainCtrl'
@@ -84,7 +87,9 @@ angular.module('svm',['ui.tinymce','ui.keypress'])
 				type = client.type
 				
 				switch type
-					when 4
+					when 1 #student
+						$location.path '/student'
+					when 4 #admin
 						$location.path '/admin'
 					else
 						menu = sessionStorage.menu
@@ -99,7 +104,10 @@ angular.module('svm',['ui.tinymce','ui.keypress'])
 	])
 	.controller('mainCtrl', ['$location','$scope','socket','$timeout',($location,$scope,socket,$timeout)->
 		#===============Global===================#
-
+		#re-check session
+		if sessionStorage.type is undefined or sessionStorage.user is undefined or sessionStorage.pass is undefined
+			$location.path "/guest"
+			
 		#modal
 		$scope.modal = {}
 		
@@ -120,7 +128,26 @@ angular.module('svm',['ui.tinymce','ui.keypress'])
 			console.log e.toString()
 			
 		#utilities
+		$scope.like = (o)->
+			o.disableLike = 1
+			socket.emit 'create', 
+				model: "likes"
+				doc:
+					postId: o._id
+					liker: $scope.user
+			, (res)->
+				o.disableLike = 0
+				if res?.liker
+					o.likeCount = o.likeCount or 0
+					o.likeCount++
+					o.liked = 1
+					
+		$scope.alertAll = (o)->
+			type = o.type
+			data = o.data
 			
+			socket.emit 'alert_all', {type,data}
+		
 		$scope.send = (o)->
 			o.disabled = 1
 			o.statusClass = 'label label-info'
@@ -220,11 +247,11 @@ angular.module('svm',['ui.tinymce','ui.keypress'])
 				fn: -> $scope.navbar.switch = "news"
 			]
 			style: "maroon no-radius"
-			switch: sessionStorage.menu
+			switch: sessionStorage.menu or "news"
 			
 		#menu watcher
 		$scope.$watch 'navbar.switch', (v)-> 
-			if v is undefined
+			if v is undefined or v is "undefined"
 				$scope.navbar.switch = "news"
 				sessionStorage.menu = "news"
 			else
@@ -278,6 +305,9 @@ angular.module('svm',['ui.tinymce','ui.keypress'])
 					sessionStorage.type = sjcl.encrypt 'type', type.toString()
 					
 					switch type
+						when 1
+							delete sessionStorage.menu
+							$location.path "/student"
 						when 4
 							delete sessionStorage.menu
 							$location.path "/admin"
@@ -287,12 +317,12 @@ angular.module('svm',['ui.tinymce','ui.keypress'])
 				show: 1
 				title: "ACTIVATE ACCOUNT"
 				inputs: [
+					label: "Full Name:"
+					model: "name"
+				,
 					label: "Student/Teacher/Alumni ID No:"
 					model: "id"
 					type: "text"
-				,
-					label: "Full Name:"
-					model: "name"
 				]
 				button: "Activate"
 				event: "read"
@@ -312,12 +342,15 @@ angular.module('svm',['ui.tinymce','ui.keypress'])
 				failed: "Account NOT Found.."
 				callback2: (res)->
 					$scope.frmSaveAccount.data.query = {name: res[0].name}
+					$scope.frmActivate.show = 0
 					$scope.frmSaveAccount.show = 1
 				callback: (res)->
 					console.log "already activated"
 					
 			#save account
 			$scope.frmSaveAccount = 
+				fnClose: -> $scope.frmActivate.show = 1
+				close: 1
 				title: "Account Found"
 				inputs: [
 					label: 'Set Username:'
@@ -384,6 +417,128 @@ angular.module('svm',['ui.tinymce','ui.keypress'])
 			return #end of guest's script, prevent execute code below
 		
 		#=================NOT GUEST==================#
+		#post page
+		$scope.attachCommentForm = (o,i)->
+			console.log o
+			if o.frmComment then return
+			o.frmComment = 
+				textareas:[
+					label: "Comment:"
+					model: "comment"
+				]
+				button: "Post Comment"
+				event: 'create'
+				dataType: 'doc'
+				data:
+					model: 'comments'
+					doc:
+						user: $scope.user
+						postId: o._id
+						comment: ""
+				callback:(res)->
+					o.comments.push res
+					o.commentCount++
+					this.data.doc.comment = ""
+				message: "Sending comment.."
+				success: "Success.."
+				failed: "Sending Failed.."
+				expect: "comment"
+				fn: $scope.send
+				show: 1
+				
+		$scope.getComments = (o,i)->
+			if o.comments then return
+			o.comments = []
+			socket.emit 'read',
+				model: 'comments'
+				query: 
+					postId: o._id
+				limit: 5
+				sort: {_id: -1}
+			,(res)->
+				rs = res or []
+				for n in rs
+					o.comments.unshift n
+		
+		$scope.getCommentCount = (o, i)->
+			if o.commentCount then return
+			socket.emit 'count',
+				model: 'comments'
+				query:
+					postId: o._id
+			,(res)->
+				o.commentCount = res
+				
+		$scope.getLikes = (o,i)-> 
+			if o.likeCount then return
+			socket.emit 'count', 
+				model: 'likes'
+				query:
+					postId: o._id
+			,(res)->
+				o.likeCount = res
+				
+		$scope.isLiked = (o,i)->
+			if o.liked then return
+			socket.emit 'count', 
+				model: 'likes'
+				query:
+					postId: o._id
+					liker: $scope.user
+				,(res)->
+					if res is 1
+						o.liked = 1
+	
+						
+		$scope.postFunctions = [
+			$scope.getLikes
+		,
+			$scope.isLiked
+		,
+			$scope.attachCommentForm
+		, 
+			$scope.getComments
+		,
+			$scope.getCommentCount
+		]
+		
+		$scope.looper = (process, obj, i)->
+		
+			len = process.length
+			
+			x = 0
+			$timeout (->
+				process[x] obj, i
+				x++
+				if x < len
+					$timeout arguments.callee, 100
+			), 100
+				
+		$scope.previous = (o, m)->
+			o.disablePrevious = 1
+			socket.emit 'read',
+				model: m
+				query:
+					postId: o._id
+				sort: {_id: -1}
+				skip: o.comments.length
+				limit: 5
+			,(res)->
+				o.disablePrevious = 0
+				rs = res or []
+				
+				for n in rs
+					o.comments.unshift n
+					
+		#alerts to all users except guest
+		socket.on 'post', (res)->
+			$scope.frmSearchPosts.rData.unshift res
+			$scope.refreshPosts()
+		
+		$scope.refreshPosts = ->
+			for n, i in $scope.frmSearchPosts.rData
+				$scope.looper $scope.postFunctions, n, i
+				
 		#add user page and logout
 		$scope.navbar.dropdowns = [
 			label: $scope.user.toUpperCase()
@@ -395,6 +550,93 @@ angular.module('svm',['ui.tinymce','ui.keypress'])
 			]
 		]
 		
+		#create post form
+		$scope.frmCreatePost = 
+			close: 1
+			title: "Create Post:"
+			inputs: [
+				label: "Title:"
+				model: "title"
+				type: "text"
+			]
+			tinymces: [
+				label: "Content:"
+				model: "content"
+			]
+			button: "Post"
+			dataType: "doc"
+			data:
+				model: "posts"
+				doc:
+					user: $scope.user
+					content: ""
+					title: ""
+					image: ""
+			event: "create"
+			message: "Posting, please wait..."
+			success: "Success.."
+			failed: "Post failed.."
+			expect: "title"
+			fn: $scope.send
+			callback: (res)->
+				$scope.frmSearchPosts.rData.unshift res
+				$scope.alertAll({type:"post",data:res})
+				$scope.frmCreatePost.show = 0
+				$scope.refreshPosts()
+		#search posts
+		$scope.frmSearchPosts = 
+			show: 1
+			inputs: [
+				label: "Search Posts:"
+				model: 0
+				type: "search"
+			]
+			button: "Search"
+			fn: $scope.send
+			event: "search"
+			rData: []
+			data:
+				model: "posts"
+				fields: ["title","user"]
+				keyword: [""]
+				limit: 5
+				sort: {_id: -1}
+			dataType: "keyword"
+			showMore: 1
+			callback: (res)->
+				$scope.frmSearchPosts.rData = $scope.frmSearchPosts.rData or []
+				
+				rs = res or []
+				if rs.length is 0
+					$scope.frmSearchPosts.showMore = 0
+					return
+				if $scope.frmSearchPosts.data.skip is 0
+					$scope.frmSearchPosts.rData = rs
+					$scope.refreshPosts()
+					
+					return
+				for n in rs
+					$scope.frmSearchPosts.rData.push n
+				$scope.refreshPosts()
+				
+				return	
+			message: "Searching, please wait.."
+			success: "Done!"
+			failed: "Failed search.."
+			expect: "length" #array
+		
+		
+				
+		#=================STUDENT PAGE===============#
+		if $scope.type is 1
+			console.log "student"
+			#modify navbar for student
+			$scope.navbar.brand = 'Welcome Student'
+			$scope.navbar.menus.unshift
+				label: "Post"
+				fn: -> $scope.navbar.switch = "post"
+
+			return #prevent execute below
 		#=================ADMIN PAGE=================#
 		if $scope.type is 4
 			#modify navbar for admin

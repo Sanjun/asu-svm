@@ -1,5 +1,5 @@
 <form ng-show='o.show' ng-animate='{show:"fade-show"}' class='{{o.formClass}}'>
-	<button ng-show='o.close' class='btn btn-xs btn-default pull-right' ng-click='o.show=0'>Close</button>
+	<button ng-show='o.close' class='btn btn-xs btn-default pull-right' ng-click='o.show=0;o.fnClose()'>Close</button>
 	<h4 ng-bind='o.title'></h4>
 	<fieldset>
 		<div class='form-group' ng-repeat='i in o.inputs'>
@@ -11,6 +11,13 @@
 		<div class='form-group' ng-repeat='s in o.selects'>
 			<label><small ng-bind='s.label'></small></label>
 			<select2 model='o.data[o.dataType][s.model]' options='s.options' class='form-control'></select2>
+		</div>
+		<div class='form-group' ng-repeat='t in o.textareas'>
+			<label>
+				<small ng-bind='t.label'></small>
+			</label>
+			<textarea class='form-control' ng-model='o.data[o.dataType][t.model]' style='resize:none;height:{{t.height||"5em"}}'>
+			</textarea>
 		</div>
 		<div class='form-group' ng-repeat='t in o.tinymces'>
 			<label>
